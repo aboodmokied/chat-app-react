@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { Button } from "../../components/ui/button";
-import { PaperPlane } from "lucide-react";
+import { Send } from "lucide-react";
 
 interface MessageInputProps {
   onSendMessage: (message: string) => void;
@@ -40,7 +40,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
         disabled={!message.trim() || isDisabled}
         className="rounded-l-none bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 font-medium disabled:opacity-50"
       >
-        <PaperPlane className="h-5 w-5" />
+        <Send className="h-5 w-5" />
         <span className="sr-only">Send message</span>
       </Button>
     </form>
