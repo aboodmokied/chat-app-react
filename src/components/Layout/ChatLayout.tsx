@@ -7,14 +7,15 @@ import ChatArea from "../Chat/ChatArea";
 // import socketService, { Room, User } from "../../services/socket";
 import { Button } from "../../components/ui/button";
 import { MenuIcon, X } from "lucide-react";
+import socketService from "@/services/socket";
 
 const ChatLayout: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, logout,isAuthenticated, token } = useAuth();
   const [rooms, setRooms] = useState<any[]>([]);
   const [activeRoom, setActiveRoom] = useState<string>("");
   const [users, setUsers] = useState<any[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-
+  const [socketConnectionLoading,setSocketConnectionLoading]=useState(false);
   // For mobile responsiveness
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
@@ -28,6 +29,20 @@ const ChatLayout: React.FC = () => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  // socket connection
+  useEffect(()=>{
+    setSocketConnectionLoading(true);
+    if(isAuthenticated){
+      try {
+        socketService.connect(token);
+        socketService.setupListeners();
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    setSocketConnectionLoading(false);
+  },[])
 
   // Initialize rooms
   useEffect(() => {
@@ -81,7 +96,13 @@ const ChatLayout: React.FC = () => {
       setSidebarOpen(false);
     }
   };
-
+  if (socketConnectionLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+      </div>
+    );
+  }
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       {/* Sidebar */}

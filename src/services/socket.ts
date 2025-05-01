@@ -42,8 +42,8 @@ export interface User {
   id: string;
   name: string;
   roles:Roles[]
-  avatar?: string;
-  isOnline?: boolean;
+  // avatar?: string;
+  // isOnline?: boolean;
 }
 
 export interface Chat {
