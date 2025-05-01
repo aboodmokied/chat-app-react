@@ -1,11 +1,11 @@
 
 import React from "react";
-import { Message, User } from "../../services/socket";
+// import { Message, User } from "../../services/socket";
 import { format } from "date-fns";
 
 interface ChatMessageProps {
-  message: Message;
-  currentUser: User | null;
+  message: any;
+  currentUser: any | null;
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({ message, currentUser }) => {
@@ -21,7 +21,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, currentUser }) => {
         <div className="flex-shrink-0 mr-2">
           <img
             src={message.sender.avatar || `https://ui-avatars.com/api/?name=${message.sender.username}`}
-            alt={message.sender.username}
+            alt={message.sender.name}
             className="w-8 h-8 rounded-full"
           />
         </div>

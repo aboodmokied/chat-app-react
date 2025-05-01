@@ -1,9 +1,9 @@
 
 import React, { createContext, useState, useContext, useEffect } from "react";
-import { User } from "../services/socket";
+// import { User } from "../services/socket";
 
 interface AuthContextType {
-  user: User | null;
+  user: any | null;
   login: (username: string, password: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
@@ -19,7 +19,7 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -35,9 +35,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       // In a real app, we would call the API here
       // This is a mock implementation
-      const mockUser: User = {
+      const mockUser: any = {
         id: `user_${Math.random().toString(36).substr(2, 9)}`,
-        username,
+        name: username,
         isOnline: true,
         avatar: `https://ui-avatars.com/api/?name=${username}&background=random`,
       };
