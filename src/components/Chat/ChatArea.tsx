@@ -7,10 +7,10 @@ import MessageInput from "./MessageInput";
 
 interface ChatAreaProps {
   currentUser: any | null;
-  activeRoom: string;
+  activeChat: string;
 }
 
-const ChatArea: React.FC<ChatAreaProps> = ({ currentUser, activeRoom }) => {
+const ChatArea: React.FC<ChatAreaProps> = ({ currentUser, activeChat }) => {
   const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -25,7 +25,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({ currentUser, activeRoom }) => {
   }, [messages]);
 
   useEffect(() => {
-    if (!activeRoom || !currentUser) return;
+    if (!activeChat || !currentUser) return;
     
     setLoading(true);
     
@@ -38,7 +38,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({ currentUser, activeRoom }) => {
     // Mock initial messages
     const mockMessages = Array.from({ length: 10 }, (_, i) => ({
       id: `msg_${i}`,
-      text: `This is message #${i + 1} in room ${activeRoom}`,
+      text: `This is message #${i + 1} in room ${activeChat}`,
       sender: {
         id: i % 3 === 0 ? currentUser.id : `user_${i}`,
         username: i % 3 === 0 ? currentUser.name : `User ${i}`,
@@ -50,8 +50,8 @@ const ChatArea: React.FC<ChatAreaProps> = ({ currentUser, activeRoom }) => {
         avatar: i % 3 === 0 ? currentUser.avatar : `https://ui-avatars.com/api/?name=User${i}&background=random`,
       },
       timestamp: new Date(Date.now() - (10 - i) * 60000),
-      room: activeRoom,
-      chatId: activeRoom,
+      room: activeChat,
+      chatId: activeChat,
     }));
     
     // Simulate loading delay
@@ -72,11 +72,11 @@ const ChatArea: React.FC<ChatAreaProps> = ({ currentUser, activeRoom }) => {
       // socketService.leaveRoom(activeRoom);
       // socket.off("message");
     };
-  }, [activeRoom, currentUser]);
+  }, [activeChat, currentUser]);
   
   // Send a new message
   const handleSendMessage = (text: string) => {
-    if (!currentUser || !activeRoom) return;
+    if (!currentUser || !activeChat) return;
     
     const tempId = `temp_${Date.now()}`;
     
@@ -87,8 +87,8 @@ const ChatArea: React.FC<ChatAreaProps> = ({ currentUser, activeRoom }) => {
       sender: currentUser,
       reciever: currentUser,
       timestamp: new Date(),
-      room: activeRoom,
-      chatId: activeRoom,
+      room: activeChat,
+      chatId: activeChat,
     };
     
     setMessages((prevMessages) => [...prevMessages, newMessage]);
@@ -125,7 +125,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({ currentUser, activeRoom }) => {
       </div>
       <MessageInput
         onSendMessage={handleSendMessage}
-        isDisabled={!currentUser || !activeRoom}
+        isDisabled={!currentUser || !activeChat}
       />
     </div>
   );

@@ -22,6 +22,9 @@ export interface GetChatsData{
 export interface GetChatMessagesData{
   messages:Message[]
 }
+export interface GetChatUsersData{
+  users:User[]
+}
 export interface MessageOpenedData{
   chatId:string,
   messageId:string
@@ -52,12 +55,19 @@ export interface Chat {
   users: User[];
 }
 
+export type ErrorHandler=(error:any)=>void;
+
 // Create a singleton socket instance
 class SocketService {
   private socket: Socket | null = null;
   private apiUrl = "http://localhost:3000"; // Change this to your API URL
+  private errorHandler:ErrorHandler=(error)=>{console.log(error)};
 
-  connect(token?: string): Socket {
+  setErrorHandler(handler:ErrorHandler){
+    this.errorHandler=handler;
+    return this;
+  }
+  connect(token: string): Socket {
     if (!this.socket) {
       this.socket = io(this.apiUrl, {
         auth: token ? { token } : undefined,
@@ -77,9 +87,7 @@ class SocketService {
         console.log(message);
       });
       
-      this.socket.on("connect_error", (error) => {
-        console.error("Socket connection error:", error);
-      });
+      this.socket.on("connect_error",this.errorHandler);
       this.socket.on("error", (error) => {
         console.error("Socket error:", error);
       });
@@ -151,6 +159,15 @@ class SocketService {
     }
   }
 
+  getChatUsers(payload:{chatId:string},callback: (data:GetChatUsersData) => void): void {
+    if (this.socket) {
+      this.socket.emit("chatMessages",payload);
+      this.socket.on("chatUsers", callback);
+    }
+  }
+
+
+  
   // Get the list of users in a room
   // getUsers(roomId: string, callback: (users: User[]) => void): void {
   //   if (this.socket) {

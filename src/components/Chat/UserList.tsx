@@ -1,14 +1,15 @@
 
+import { User } from "@/services/socket";
 import React from "react";
 // import { User } from "../../services/socket";
 
 interface UserListProps {
-  users: any[];
+  users: User[];
 }
 
 const UserList: React.FC<UserListProps> = ({ users }) => {
-  const onlineUsers = users.filter((user) => user.isOnline);
-  const offlineUsers = users.filter((user) => !user.isOnline);
+  const onlineUsers = users.filter((user) => true);
+  const offlineUsers = [] //users.filter((user) => !user.isOnline);
 
   return (
     <div className="py-2">
@@ -23,7 +24,7 @@ const UserList: React.FC<UserListProps> = ({ users }) => {
           >
             <div className="relative flex-shrink-0">
               <img
-                src={user.avatar || `https://ui-avatars.com/api/?name=${user.name}`}
+                src={/*user.avatar ||*/`https://ui-avatars.com/api/?name=${user.name}`}
                 alt={user.name}
                 className="w-8 h-8 rounded-full"
               />

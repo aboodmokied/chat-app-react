@@ -1,23 +1,25 @@
 
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
-import RoomList from "../Chat/RoomList";
 import UserList from "../Chat/UserList";
 import ChatArea from "../Chat/ChatArea";
 // import socketService, { Room, User } from "../../services/socket";
 import { Button } from "../../components/ui/button";
 import { MenuIcon, X } from "lucide-react";
-import socketService from "@/services/socket";
+import socketService, { Chat, GetChatsData, GetChatUsersData, User } from "@/services/socket";
+import { useSocket } from "@/context/SocketContext";
+import ChatList from "../Chat/RoomList";
 
 const ChatLayout: React.FC = () => {
   const { user, logout,isAuthenticated, token } = useAuth();
-  const [rooms, setRooms] = useState<any[]>([]);
-  const [activeRoom, setActiveRoom] = useState<string>("");
-  const [users, setUsers] = useState<any[]>([]);
+  const [chats, setChats] = useState<Chat[]>([]);
+  const [activeChat, setActiveChat] = useState<string|null>(null);
+  const [users, setUsers] = useState<User[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [socketConnectionLoading,setSocketConnectionLoading]=useState(false);
   // For mobile responsiveness
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  const {socket,connectSocket,socketConnectionLoading,socketError}=useSocket();
 
   useEffect(() => {
     const handleResize = () => {
@@ -32,32 +34,21 @@ const ChatLayout: React.FC = () => {
 
   // socket connection
   useEffect(()=>{
-    setSocketConnectionLoading(true);
     if(isAuthenticated){
-      try {
-        socketService.connect(token);
-        socketService.setupListeners();
-      } catch (error) {
-        console.error(error);
-      }
+      connectSocket(token);
     }
-    setSocketConnectionLoading(false);
-  },[])
+  },[isAuthenticated])
 
-  // Initialize rooms
+  // Initialize chats
   useEffect(() => {
-    if (!user) return;
+    if (!user || !socket) return;
 
-    // Mock rooms data
-    const mockRooms: any[] = [
-      { id: "general", name: "General" },
-      { id: "random", name: "Random" },
-      { id: "support", name: "Support" },
-      { id: "announcements", name: "Announcements" },
-    ];
-    
-    setRooms(mockRooms);
-    setActiveRoom("general");
+    // Get User Chats
+    socketService.getChats(({chats}:GetChatsData) => {
+      console.log({chats});
+      setChats(chats);
+    })
+    setActiveChat(chats[0]?.id||null);
     
     // In a real app, we would get rooms from the server
     // socketService.getRooms((serverRooms) => {
@@ -66,36 +57,27 @@ const ChatLayout: React.FC = () => {
     //     setActiveRoom(serverRooms[0].id);
     //   }
     // });
-  }, [user]);
+  }, [socket]);
 
   // Get users for the active room
   useEffect(() => {
-    if (!user || !activeRoom) return;
+    if (!user || !activeChat || !socket) return;
 
-    // Mock users data
-    const mockUsers: any[] = [
-      { id: user.id, name: user.name, avatar: user.avatar, isOnline: true },
-      { id: "user1", name: "John Doe", avatar: "https://ui-avatars.com/api/?name=John+Doe&background=random", isOnline: true },
-      { id: "user2", name: "Jane Smith", avatar: "https://ui-avatars.com/api/?name=Jane+Smith&background=random", isOnline: true },
-      { id: "user3", name: "Mike Johnson", avatar: "https://ui-avatars.com/api/?name=Mike+Johnson&background=random", isOnline: false },
-      { id: "user4", name: "Sarah Williams", avatar: "https://ui-avatars.com/api/?name=Sarah+Williams&background=random", isOnline: false },
-    ];
     
-    setUsers(mockUsers);
+    socketService.getChatUsers({chatId:activeChat},({users}:GetChatUsersData)=>{
+      console.log({users});
+      setUsers(users);
+    })    
+  }, [user, activeChat,socket]);
 
-    // In a real app, we would get users from the server
-    // socketService.getUsers(activeRoom, (roomUsers) => {
-    //   setUsers(roomUsers);
-    // });
-  }, [user, activeRoom]);
-
-  const handleRoomSelect = (roomId: string) => {
+  const handleChatSelect = (chatId: string) => {
     console.log('New Room')
-    setActiveRoom(roomId);
+    setActiveChat(chatId);
     if (isMobile) {
       setSidebarOpen(false);
     }
   };
+
   if (socketConnectionLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
@@ -103,6 +85,30 @@ const ChatLayout: React.FC = () => {
       </div>
     );
   }
+
+  if (socketError) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative max-w-md">
+          <strong className="font-bold">Connection Error!</strong>
+          <p className="block sm:inline"> {socketError.message || 'Could not connect to chat server.'}</p>
+        </div>
+        <button 
+          onClick={() => connectSocket(token)} 
+          className="mt-4 px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors"
+        >
+          Try Again
+        </button>
+        <button 
+          onClick={logout} 
+          className="mt-2 px-4 py-2 text-red-600 hover:text-red-800 transition-colors"
+        >
+          Logout
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       {/* Sidebar */}
@@ -133,10 +139,10 @@ const ChatLayout: React.FC = () => {
         </div>
 
         <div className="flex-1 overflow-y-auto">
-          <RoomList 
-            rooms={rooms} 
-            activeRoom={activeRoom} 
-            onRoomSelect={handleRoomSelect} 
+          <ChatList 
+            chats={chats} 
+            activeChat={activeChat} 
+            onChatSelect={handleChatSelect} 
           />
         </div>
 
@@ -182,20 +188,20 @@ const ChatLayout: React.FC = () => {
             <span className="sr-only">Open sidebar</span>
           </button>
           <h2 className="font-medium">
-            {activeRoom && rooms.find(room => room.id === activeRoom)?.name}
+            {activeChat && chats.find(chat => chat.id === activeChat)?.id}
           </h2>
         </div>
         
         {/* Room header for desktop */}
         <div className="hidden lg:flex bg-white dark:bg-gray-800 p-4 border-b border-gray-200 dark:border-gray-700 items-center">
           <h2 className="font-medium text-lg">
-            # {activeRoom && rooms.find(room => room.id === activeRoom)?.name}
+            # {activeChat && chats.find(chat => chat.id === activeChat)?.id}
           </h2>
         </div>
 
         {/* Chat area */}
         <div className="flex-1 overflow-hidden">
-          <ChatArea currentUser={user} activeRoom={activeRoom} />
+          <ChatArea currentUser={user} activeChat={activeChat} />
         </div>
       </div>
 
