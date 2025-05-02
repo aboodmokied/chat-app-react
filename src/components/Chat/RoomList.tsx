@@ -1,10 +1,10 @@
 
 import React from "react";
-import { Room } from "../../services/socket";
+// import { Room } from "../../services/socket";
 import { cn } from "../../lib/utils";
 
 interface RoomListProps {
-  rooms: Room[];
+  rooms: any[];
   activeRoom?: string;
   onRoomSelect: (roomId: string) => void;
 }

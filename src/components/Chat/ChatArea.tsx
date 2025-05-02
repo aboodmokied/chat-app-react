@@ -2,16 +2,16 @@
 import React, { useEffect, useRef, useState } from "react";
 import ChatMessage from "./ChatMessage";
 import MessageInput from "./MessageInput";
-import { Message, User } from "../../services/socket";
-import socketService from "../../services/socket";
+// import { Message, User } from "../../services/socket";
+// import socketService from "../../services/socket";
 
 interface ChatAreaProps {
-  currentUser: User | null;
+  currentUser: any | null;
   activeRoom: string;
 }
 
 const ChatArea: React.FC<ChatAreaProps> = ({ currentUser, activeRoom }) => {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -30,22 +30,28 @@ const ChatArea: React.FC<ChatAreaProps> = ({ currentUser, activeRoom }) => {
     setLoading(true);
     
     // Connect to socket if not already connected
-    const socket = socketService.connect();
+    // const socket = socketService.connect();
     
     // Join the active room
-    socketService.joinRoom(activeRoom);
+    // socketService.joinChat(activeRoom);
     
     // Mock initial messages
-    const mockMessages: Message[] = Array.from({ length: 10 }, (_, i) => ({
+    const mockMessages = Array.from({ length: 10 }, (_, i) => ({
       id: `msg_${i}`,
       text: `This is message #${i + 1} in room ${activeRoom}`,
       sender: {
         id: i % 3 === 0 ? currentUser.id : `user_${i}`,
-        username: i % 3 === 0 ? currentUser.username : `User ${i}`,
+        username: i % 3 === 0 ? currentUser.name : `User ${i}`,
+        avatar: i % 3 === 0 ? currentUser.avatar : `https://ui-avatars.com/api/?name=User${i}&background=random`,
+      },
+      reciever: {
+        id: i % 3 === 0 ? currentUser.id : `user_${i}`,
+        username: i % 3 === 0 ? currentUser.name : `User ${i}`,
         avatar: i % 3 === 0 ? currentUser.avatar : `https://ui-avatars.com/api/?name=User${i}&background=random`,
       },
       timestamp: new Date(Date.now() - (10 - i) * 60000),
       room: activeRoom,
+      chatId: activeRoom,
     }));
     
     // Simulate loading delay
@@ -55,16 +61,16 @@ const ChatArea: React.FC<ChatAreaProps> = ({ currentUser, activeRoom }) => {
     }, 1000);
     
     // Listen for incoming messages
-    socket.on("message", (newMessage: Message) => {
-      if (newMessage.room === activeRoom) {
-        setMessages((prevMessages) => [...prevMessages, newMessage]);
-      }
-    });
+    // socket.on("message", (newMessage: Message) => {
+    //   if (newMessage.room === activeRoom) {
+    //     setMessages((prevMessages) => [...prevMessages, newMessage]);
+    //   }
+    // });
     
     return () => {
       // Leave the room when unmounting or changing rooms
-      socketService.leaveRoom(activeRoom);
-      socket.off("message");
+      // socketService.leaveRoom(activeRoom);
+      // socket.off("message");
     };
   }, [activeRoom, currentUser]);
   
@@ -75,18 +81,20 @@ const ChatArea: React.FC<ChatAreaProps> = ({ currentUser, activeRoom }) => {
     const tempId = `temp_${Date.now()}`;
     
     // Optimistic update
-    const newMessage: Message = {
+    const newMessage: any = {
       id: tempId,
-      text,
+      content:text,
       sender: currentUser,
+      reciever: currentUser,
       timestamp: new Date(),
       room: activeRoom,
+      chatId: activeRoom,
     };
     
     setMessages((prevMessages) => [...prevMessages, newMessage]);
     
     // Send the message via socket.io
-    socketService.sendMessage({ text }, activeRoom);
+    // socketService.sendMessage({ text }, activeRoom);
   };
   
   return (

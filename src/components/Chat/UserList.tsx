@@ -1,9 +1,9 @@
 
 import React from "react";
-import { User } from "../../services/socket";
+// import { User } from "../../services/socket";
 
 interface UserListProps {
-  users: User[];
+  users: any[];
 }
 
 const UserList: React.FC<UserListProps> = ({ users }) => {
@@ -23,13 +23,13 @@ const UserList: React.FC<UserListProps> = ({ users }) => {
           >
             <div className="relative flex-shrink-0">
               <img
-                src={user.avatar || `https://ui-avatars.com/api/?name=${user.username}`}
-                alt={user.username}
+                src={user.avatar || `https://ui-avatars.com/api/?name=${user.name}`}
+                alt={user.name}
                 className="w-8 h-8 rounded-full"
               />
               <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full"></span>
             </div>
-            <span className="ml-2 font-medium truncate">{user.username}</span>
+            <span className="ml-2 font-medium truncate">{user.name}</span>
           </div>
         ))}
       </div>
@@ -47,12 +47,12 @@ const UserList: React.FC<UserListProps> = ({ users }) => {
               >
                 <div className="relative flex-shrink-0">
                   <img
-                    src={user.avatar || `https://ui-avatars.com/api/?name=${user.username}`}
-                    alt={user.username}
+                    src={user.avatar || `https://ui-avatars.com/api/?name=${user.name}`}
+                    alt={user.name}
                     className="w-8 h-8 rounded-full opacity-60"
                   />
                 </div>
-                <span className="ml-2 truncate">{user.username}</span>
+                <span className="ml-2 truncate">{user.name}</span>
               </div>
             ))}
           </div>

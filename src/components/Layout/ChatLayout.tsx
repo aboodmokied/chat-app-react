@@ -4,17 +4,18 @@ import { useAuth } from "../../context/AuthContext";
 import RoomList from "../Chat/RoomList";
 import UserList from "../Chat/UserList";
 import ChatArea from "../Chat/ChatArea";
-import socketService, { Room, User } from "../../services/socket";
+// import socketService, { Room, User } from "../../services/socket";
 import { Button } from "../../components/ui/button";
 import { MenuIcon, X } from "lucide-react";
+import socketService from "@/services/socket";
 
 const ChatLayout: React.FC = () => {
-  const { user, logout } = useAuth();
-  const [rooms, setRooms] = useState<Room[]>([]);
+  const { user, logout,isAuthenticated, token } = useAuth();
+  const [rooms, setRooms] = useState<any[]>([]);
   const [activeRoom, setActiveRoom] = useState<string>("");
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-
+  const [socketConnectionLoading,setSocketConnectionLoading]=useState(false);
   // For mobile responsiveness
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
@@ -29,12 +30,26 @@ const ChatLayout: React.FC = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // socket connection
+  useEffect(()=>{
+    setSocketConnectionLoading(true);
+    if(isAuthenticated){
+      try {
+        socketService.connect(token);
+        socketService.setupListeners();
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    setSocketConnectionLoading(false);
+  },[])
+
   // Initialize rooms
   useEffect(() => {
     if (!user) return;
 
     // Mock rooms data
-    const mockRooms: Room[] = [
+    const mockRooms: any[] = [
       { id: "general", name: "General" },
       { id: "random", name: "Random" },
       { id: "support", name: "Support" },
@@ -45,12 +60,12 @@ const ChatLayout: React.FC = () => {
     setActiveRoom("general");
     
     // In a real app, we would get rooms from the server
-    socketService.getRooms((serverRooms) => {
-      setRooms(serverRooms);
-      if (serverRooms.length > 0 && !activeRoom) {
-        setActiveRoom(serverRooms[0].id);
-      }
-    });
+    // socketService.getRooms((serverRooms) => {
+    //   setRooms(serverRooms);
+    //   if (serverRooms.length > 0 && !activeRoom) {
+    //     setActiveRoom(serverRooms[0].id);
+    //   }
+    // });
   }, [user]);
 
   // Get users for the active room
@@ -58,29 +73,36 @@ const ChatLayout: React.FC = () => {
     if (!user || !activeRoom) return;
 
     // Mock users data
-    const mockUsers: User[] = [
-      { id: user.id, username: user.username, avatar: user.avatar, isOnline: true },
-      { id: "user1", username: "John Doe", avatar: "https://ui-avatars.com/api/?name=John+Doe&background=random", isOnline: true },
-      { id: "user2", username: "Jane Smith", avatar: "https://ui-avatars.com/api/?name=Jane+Smith&background=random", isOnline: true },
-      { id: "user3", username: "Mike Johnson", avatar: "https://ui-avatars.com/api/?name=Mike+Johnson&background=random", isOnline: false },
-      { id: "user4", username: "Sarah Williams", avatar: "https://ui-avatars.com/api/?name=Sarah+Williams&background=random", isOnline: false },
+    const mockUsers: any[] = [
+      { id: user.id, name: user.name, avatar: user.avatar, isOnline: true },
+      { id: "user1", name: "John Doe", avatar: "https://ui-avatars.com/api/?name=John+Doe&background=random", isOnline: true },
+      { id: "user2", name: "Jane Smith", avatar: "https://ui-avatars.com/api/?name=Jane+Smith&background=random", isOnline: true },
+      { id: "user3", name: "Mike Johnson", avatar: "https://ui-avatars.com/api/?name=Mike+Johnson&background=random", isOnline: false },
+      { id: "user4", name: "Sarah Williams", avatar: "https://ui-avatars.com/api/?name=Sarah+Williams&background=random", isOnline: false },
     ];
     
     setUsers(mockUsers);
 
     // In a real app, we would get users from the server
-    socketService.getUsers(activeRoom, (roomUsers) => {
-      setUsers(roomUsers);
-    });
+    // socketService.getUsers(activeRoom, (roomUsers) => {
+    //   setUsers(roomUsers);
+    // });
   }, [user, activeRoom]);
 
   const handleRoomSelect = (roomId: string) => {
+    console.log('New Room')
     setActiveRoom(roomId);
     if (isMobile) {
       setSidebarOpen(false);
     }
   };
-
+  if (socketConnectionLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+      </div>
+    );
+  }
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       {/* Sidebar */}
@@ -129,11 +151,11 @@ const ChatLayout: React.FC = () => {
             <>
               <div className="flex items-center space-x-2">
                 <img
-                  src={user.avatar || `https://ui-avatars.com/api/?name=${user.username}`}
-                  alt={user.username}
+                  src={user.avatar || `https://ui-avatars.com/api/?name=${user.name}`}
+                  alt={user.name}
                   className="w-8 h-8 rounded-full"
                 />
-                <span className="font-medium">{user.username}</span>
+                <span className="font-medium">{user.name}</span>
               </div>
               <Button 
                 onClick={logout} 
