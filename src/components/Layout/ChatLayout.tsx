@@ -8,7 +8,7 @@ import { Button } from "../../components/ui/button";
 import { MenuIcon, X } from "lucide-react";
 import socketService, { Chat, GetChatsData, GetChatUsersData, User } from "@/services/socket";
 import { useSocket } from "@/context/SocketContext";
-import ChatList from "../Chat/RoomList";
+import ChatList from "../Chat/ChatList";
 
 const ChatLayout: React.FC = () => {
   const { user, logout,isAuthenticated, token } = useAuth();
