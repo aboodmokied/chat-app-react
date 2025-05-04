@@ -3,6 +3,7 @@ import React from "react";
 import { useAuth } from "../context/AuthContext";
 import LoginForm from "../components/Auth/LoginForm";
 import ChatLayout from "../components/Layout/ChatLayout";
+import { SocketProvider } from "@/context/SocketContext";
 
 const Index: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -18,7 +19,9 @@ const Index: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       {isAuthenticated ? (
-        <ChatLayout />
+        <SocketProvider>
+          <ChatLayout />
+        </SocketProvider>
       ) : (
         <div className="flex items-center justify-center min-h-screen">
           <LoginForm />

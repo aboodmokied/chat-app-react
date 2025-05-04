@@ -31,7 +31,7 @@ export interface MessageOpenedData{
 }
 export interface NewMessageData{
   message:Message,
-  chatId:string,
+  chat:Chat,
   recieverId:string
 }
 
@@ -98,18 +98,22 @@ class SocketService {
   
   setupListeners(){  // priveteMessage, newChat
     if(this.socket){
-      this.socket.on("newChat", ({chat}:NewChatData) => {
-        console.log('new chat:',chat);
-      });
-      this.socket.on("newMessage", ({message,chatId,recieverId}:NewMessageData) => {
-        console.log("newMessage",{message,chatId,recieverId});
-      });
+      // this.socket.on("newChat", ({chat}:NewChatData) => {
+      //   console.log('new chat:',chat);
+      // });
+      // this.socket.on("newMessage", ({message,chatId,recieverId}:NewMessageData) => {
+      //   console.log("newMessage",{message,chatId,recieverId});
+      // });
       this.socket.on("messageOpened", (data:MessageOpenedData) => {
         console.log("messageOpened:",data);
       });
     }
   }
-
+  removeListeners(){
+    if(this.socket){
+      this.socket.off("messageOpened");
+    }
+  }
   disconnect(): void {
     if (this.socket) {
       this.socket.disconnect();
@@ -138,6 +142,16 @@ class SocketService {
     }
   }
 
+  onNewChat(callback: (data:NewChatData) => void){
+    if (this.socket) {
+      this.socket.on("newChat", callback);
+    }
+  }
+  onNewMessage(callback: (data:NewMessageData) => void){
+    if (this.socket) {
+      this.socket.on("newMessage", callback);
+    }
+  }
   // // Leave a specific chat room
   // leaveRoom(roomId: string): void {
   //   if (this.socket) {
@@ -166,7 +180,22 @@ class SocketService {
     }
   }
 
+  offNewChat(){
+    if(this.socket){
+      this.socket.off("newChat");
+    }
+  }
+  offNewMessage(){
+    if(this.socket){
+      this.socket.off("newMessage");
+    }
+  }
 
+  disconnectSocket(){
+    if(this.socket){
+      this.socket.disconnect();
+    }
+  }
   
   // Get the list of users in a room
   // getUsers(roomId: string, callback: (users: User[]) => void): void {

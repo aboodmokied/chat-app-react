@@ -5,7 +5,7 @@ import axios, { AxiosRequestConfig } from 'axios';
 import { User } from "@/services/socket";
 
 interface AuthContextType {
-  user: any | null;
+  user: User | null;
   login: (username: string, password: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
@@ -31,7 +31,7 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<any | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [token, setToken] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);

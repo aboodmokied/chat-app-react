@@ -1,20 +1,21 @@
-
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import ChatMessage from "./ChatMessage";
 import MessageInput from "./MessageInput";
+import socketService, { GetChatMessagesData, Message, User } from "@/services/socket";
 // import { Message, User } from "../../services/socket";
 // import socketService from "../../services/socket";
 
 interface ChatAreaProps {
-  currentUser: any | null;
+  currentUser: User | null;
   activeChat: string;
+  newMessage: Message;
 }
 
-const ChatArea: React.FC<ChatAreaProps> = ({ currentUser, activeChat }) => {
-  const [messages, setMessages] = useState<any[]>([]);
+const ChatArea: React.FC<ChatAreaProps> = ({ currentUser, activeChat, newMessage }) => {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [messageMap, setMessageMap] = useState<Map<string, Message>>(new Map());
   const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
   // Scroll to the bottom of the messages
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -29,44 +30,24 @@ const ChatArea: React.FC<ChatAreaProps> = ({ currentUser, activeChat }) => {
     
     setLoading(true);
     
-    // Connect to socket if not already connected
-    // const socket = socketService.connect();
-    
-    // Join the active room
-    // socketService.joinChat(activeRoom);
-    
-    // Mock initial messages
-    const mockMessages = Array.from({ length: 10 }, (_, i) => ({
-      id: `msg_${i}`,
-      text: `This is message #${i + 1} in room ${activeChat}`,
-      sender: {
-        id: i % 3 === 0 ? currentUser.id : `user_${i}`,
-        username: i % 3 === 0 ? currentUser.name : `User ${i}`,
-        avatar: i % 3 === 0 ? currentUser.avatar : `https://ui-avatars.com/api/?name=User${i}&background=random`,
-      },
-      reciever: {
-        id: i % 3 === 0 ? currentUser.id : `user_${i}`,
-        username: i % 3 === 0 ? currentUser.name : `User ${i}`,
-        avatar: i % 3 === 0 ? currentUser.avatar : `https://ui-avatars.com/api/?name=User${i}&background=random`,
-      },
-      timestamp: new Date(Date.now() - (10 - i) * 60000),
-      room: activeChat,
+    socketService.getChatMessages({
       chatId: activeChat,
-    }));
-    
-    // Simulate loading delay
-    setTimeout(() => {
-      setMessages(mockMessages);
+      limit: 50,
+      page: 1
+    },({messages}:GetChatMessagesData)=>{
+      setMessageMap(prevMap => {
+        const updated = new Map(prevMap);
+        messages.forEach(msg => {
+          if (msg.id && !updated.has(msg.id)) {
+            updated.set(msg.id, msg);
+          }
+        });
+        return updated;
+      });
+      setMessages(messages);
       setLoading(false);
-    }, 1000);
-    
-    // Listen for incoming messages
-    // socket.on("message", (newMessage: Message) => {
-    //   if (newMessage.room === activeRoom) {
-    //     setMessages((prevMessages) => [...prevMessages, newMessage]);
-    //   }
-    // });
-    
+    });
+
     return () => {
       // Leave the room when unmounting or changing rooms
       // socketService.leaveRoom(activeRoom);
@@ -74,6 +55,35 @@ const ChatArea: React.FC<ChatAreaProps> = ({ currentUser, activeChat }) => {
     };
   }, [activeChat, currentUser]);
   
+  // Add new message from parent prop to messages
+  // useEffect(() => {
+  //   if (newMessage && newMessage.id) {
+  //     setMessages((prevMessages) => {
+  //       // Check if message already exists in the array
+  //       const messageExists = prevMessages.some(msg => msg.id === newMessage.id);
+  //       if (!messageExists) {
+  //         return [...prevMessages, newMessage];
+  //       }
+  //       return prevMessages;
+  //     });
+  //   }
+  // }, [newMessage]);
+  useEffect(() => {
+    if (newMessage && newMessage.id) {
+      setMessageMap(prevMap => {
+        if (prevMap.has(newMessage.id)) return prevMap;
+        const updated = new Map(prevMap);
+        updated.set(newMessage.id, newMessage);
+        return updated;
+      });
+    }
+  }, [newMessage]);
+
+ // Memoize the sorted messages to prevent unnecessary re-sorting
+ const sortedMessages = useMemo(() => {
+  return Array.from(messageMap.values()).sort((a: Message, b: Message) => a.timestamp.getTime() - b.timestamp.getDate());
+}, [messageMap]); // Only re-sort if messageMap changes
+
   // Send a new message
   const handleSendMessage = (text: string) => {
     if (!currentUser || !activeChat) return;
@@ -83,7 +93,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({ currentUser, activeChat }) => {
     // Optimistic update
     const newMessage: any = {
       id: tempId,
-      content:text,
+      content: text,
       sender: currentUser,
       reciever: currentUser,
       timestamp: new Date(),
@@ -112,13 +122,16 @@ const ChatArea: React.FC<ChatAreaProps> = ({ currentUser, activeChat }) => {
           </div>
         ) : (
           <>
-            {messages.map((message) => (
+          {sortedMessages.map(msg => (
+            <ChatMessage key={msg.id} message={msg} currentUser={currentUser}/>
+          ))}
+            {/* {messages.map((message) => (
               <ChatMessage
                 key={message.id}
                 message={message}
                 currentUser={currentUser}
               />
-            ))}
+            ))} */}
             <div ref={messagesEndRef} />
           </>
         )}

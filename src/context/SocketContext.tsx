@@ -24,7 +24,7 @@ const SocketContext = createContext<SocketContextType>({
  * Provider component that wraps application to provide socket functionality
  * @param children - Child components that will have access to socket context
  */
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // State for socket instance and connection status
   const [socket, setSocket] = useState<Socket | null>(null);
   const [socketConnectionLoading, setSocketConnectionLoading] = useState(true);
@@ -43,9 +43,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('Socket Error', error);
         setSocketError(error);
       }).connect(token);
-      
-      // Initialize socket event listeners
-      socketService.setupListeners();
       
       // Store socket instance if connection is successful
       if (socket.connected) {
