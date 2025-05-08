@@ -2,7 +2,7 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 // import { User } from "../services/socket";
 import axios, { AxiosRequestConfig } from 'axios';
-import { User } from "@/services/socket";
+import socketService, { User } from "@/services/socket";
 
 interface AuthContextType {
   user: User | null;
@@ -66,20 +66,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         password
       },config)
       const {accessToken,user}=response.data;
-      console.log({accessToken,user});
       // This is a mock implementation
       setToken(accessToken);  
       // setUser(user);
       setIsAuthenticated(true);  
-      const mockUser: any = {
-        id: `user_${Math.random().toString(36).substr(2, 9)}`,
-        name: "abood",
-        isOnline: true,
-        avatar: `https://ui-avatars.com/api/?name=${"abood"}&background=random`,
-      };
+      // const mockUser: any = {
+      //   id: `user_${Math.random().toString(36).substr(2, 9)}`,
+      //   name: "abood",
+      //   isOnline: true,
+      //   avatar: `https://ui-avatars.com/api/?name=${"abood"}&background=random`,
+      // };
       
-      setUser(mockUser);
-      localStorage.setItem("chat_user", JSON.stringify(mockUser));
+      setUser(user);
+      localStorage.setItem("chat_user", JSON.stringify(user));
       localStorage.setItem("token", JSON.stringify(accessToken));
       
       
@@ -96,6 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
     setIsAuthenticated(false);
     setToken(null);
+    socketService.disconnect();
     localStorage.removeItem("chat_user");
     localStorage.removeItem("token");
   };

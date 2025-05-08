@@ -8,18 +8,17 @@ interface UserListProps {
 }
 
 const UserList: React.FC<UserListProps> = ({ users }) => {
-  const onlineUsers = users.filter((user) => true);
+  const onlineUsers = users;
   const offlineUsers = [] //users.filter((user) => !user.isOnline);
-
   return (
     <div className="py-2">
       <p className="px-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
         Online — {onlineUsers.length}
       </p>
       <div className="space-y-1">
-        {onlineUsers.map((user) => (
+        {onlineUsers.map((user:User) => (
           <div
-            key={user.id}
+            key={user._id}
             className="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
           >
             <div className="relative flex-shrink-0">
@@ -41,14 +40,14 @@ const UserList: React.FC<UserListProps> = ({ users }) => {
             Offline — {offlineUsers.length}
           </p>
           <div className="space-y-1">
-            {offlineUsers.map((user) => (
+            {offlineUsers.map((user:User) => (
               <div
-                key={user.id}
+                key={user._id}
                 className="flex items-center px-4 py-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
               >
                 <div className="relative flex-shrink-0">
                   <img
-                    src={user.avatar || `https://ui-avatars.com/api/?name=${user.name}`}
+                    src={/*user.avatar || */`https://ui-avatars.com/api/?name=${user.name}`}
                     alt={user.name}
                     className="w-8 h-8 rounded-full opacity-60"
                   />
@@ -63,4 +62,4 @@ const UserList: React.FC<UserListProps> = ({ users }) => {
   );
 };
 
-export default UserList;
+export default React.memo(UserList);

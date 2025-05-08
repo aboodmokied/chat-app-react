@@ -9,7 +9,8 @@ interface SocketContextType {
   socket: Socket | null;                // Socket instance when connected
   connectSocket: (token: string) => void; // Function to establish socket connection
   socketError: any;                     // Error state for socket connections
-  socketConnectionLoading: boolean;     // Loading state during connection attempts
+  socketConnectionLoading: boolean; 
+  socketConnected: boolean;
 }
 
 // Create context with default values
@@ -18,6 +19,7 @@ const SocketContext = createContext<SocketContextType>({
   connectSocket: (token: string) => {},
   socketError: null,
   socketConnectionLoading: true,
+  socketConnected: false,
 });
 
 /**
@@ -27,6 +29,7 @@ const SocketContext = createContext<SocketContextType>({
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // State for socket instance and connection status
   const [socket, setSocket] = useState<Socket | null>(null);
+  const [socketConnected, setSocketConnected] = useState<boolean>(false);
   const [socketConnectionLoading, setSocketConnectionLoading] = useState(true);
   const [socketError, setSocketError] = useState(null);
 
@@ -37,17 +40,35 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const connectSocket = async (token: string) => {
     try {
       setSocketConnectionLoading(true);
-      
       // Connect to socket server and set up error handler
       const socket = socketService.setErrorHandler((error) => {
         console.error('Socket Error', error);
         setSocketError(error);
       }).connect(token);
+      setSocket(socket);
+       socket.on("connect", () => {
+        setSocketConnected(true);
+      });
+      socket.on("userConnected", (message) => {
+        console.log(message);
+      });
       
-      // Store socket instance if connection is successful
-      if (socket.connected) {
-        setSocket(socket);
-      }
+      socket.on("disconnect", () => {
+        console.log("Socket disconnected");
+        // setSocket(null);
+      });
+      socket.on("userDisconnected", (message) => {
+        console.log(message);
+      });
+      
+      socket.on("connect_error",(error)=>{
+        console.error("Socket connection error:", error);
+        setSocketError(error);
+      });
+      socket.on("error", (error) => {
+        console.error("Socket error:", error);
+        setSocketError(error);
+      });
     } catch (error) {
       console.error("Socket Connection Failed:", error);
       setSocketError(error.response?.data || error.message);
@@ -63,7 +84,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         socket,
         connectSocket,
         socketError,
-        socketConnectionLoading
+        socketConnectionLoading,
+        socketConnected
       }}
     >
       {children}

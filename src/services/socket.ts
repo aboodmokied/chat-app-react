@@ -3,7 +3,7 @@ import { io, Socket } from "socket.io-client";
 
 // Define types for our socket events
 export interface Message {
-  id: string;
+  _id: string;
   content: string;
   chatId: string;
   sender: User;
@@ -23,7 +23,7 @@ export interface GetChatMessagesData{
   messages:Message[]
 }
 export interface GetChatUsersData{
-  users:User[]
+  users:{users:User[]}
 }
 export interface MessageOpenedData{
   chatId:string,
@@ -42,7 +42,7 @@ export enum Roles{
 }
 
 export interface User {
-  id: string;
+  _id: string;
   name: string;
   roles:Roles[]
   // avatar?: string;
@@ -50,7 +50,7 @@ export interface User {
 }
 
 export interface Chat {
-  id: string;
+  _id: string;
   room: string;
   users: User[];
 }
@@ -73,24 +73,24 @@ class SocketService {
         auth: token ? { token } : undefined,
       });
       
-      this.socket.on("connect", () => {
-        console.log("Socket connected successfully");
-      });
-      this.socket.on("userConnected", (message) => {
-        console.log(message);
-      });
+      // this.socket.on("connect", () => {
+      //   console.log("Socket connected successfully");
+      // });
+      // this.socket.on("userConnected", (message) => {
+      //   console.log(message);
+      // });
       
-      this.socket.on("disconnect", () => {
-        console.log("Socket disconnected");
-      });
-      this.socket.on("userDisconnected", (message) => {
-        console.log(message);
-      });
+      // this.socket.on("disconnect", () => {
+      //   console.log("Socket disconnected");
+      // });
+      // this.socket.on("userDisconnected", (message) => {
+      //   console.log(message);
+      // });
       
-      this.socket.on("connect_error",this.errorHandler);
-      this.socket.on("error", (error) => {
-        console.error("Socket error:", error);
-      });
+      // this.socket.on("connect_error",this.errorHandler);
+      // this.socket.on("error", (error) => {
+      //   console.error("Socket error:", error);
+      // });
     }
     
     return this.socket;
@@ -133,11 +133,11 @@ class SocketService {
   }
 
   // Join a specific chat room
-  joinChat(senderId: string,recieverId:string): void {
+  joinChat(senderId: string,recieverEmail:string): void {
     if (this.socket) {
       this.socket.emit("joinChat", {
         senderId,
-        recieverId,
+        recieverEmail,
       });
     }
   }
@@ -175,7 +175,7 @@ class SocketService {
 
   getChatUsers(payload:{chatId:string},callback: (data:GetChatUsersData) => void): void {
     if (this.socket) {
-      this.socket.emit("chatMessages",payload);
+      this.socket.emit("chatUsers",payload);
       this.socket.on("chatUsers", callback);
     }
   }
@@ -191,6 +191,23 @@ class SocketService {
     }
   }
 
+  offGetChats(){
+    if(this.socket){
+      this.socket.off("myChats");
+    }
+  }
+
+  offGetChatMessages(){
+    if(this.socket){
+      this.socket.off("chatMessages");
+    }
+  }
+
+  offGetChatUsers(){
+    if(this.socket){
+      this.socket.off("chatUsers");
+    }
+  }
   disconnectSocket(){
     if(this.socket){
       this.socket.disconnect();

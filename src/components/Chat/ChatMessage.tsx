@@ -1,15 +1,15 @@
 
 import React from "react";
-// import { Message, User } from "../../services/socket";
 import { format } from "date-fns";
+import { Message, User } from "@/services/socket";
 
 interface ChatMessageProps {
-  message: any;
-  currentUser: any | null;
+  message: Message;
+  currentUser: User | null;
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({ message, currentUser }) => {
-  const isOwnMessage = message.sender.id === currentUser?.id;
+  const isOwnMessage = message.sender._id === currentUser?._id;
   
   return (
     <div
@@ -20,7 +20,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, currentUser }) => {
       {!isOwnMessage && (
         <div className="flex-shrink-0 mr-2">
           <img
-            src={message.sender.avatar || `https://ui-avatars.com/api/?name=${message.sender.username}`}
+            src={/*message.sender.avatar ||*/ `https://ui-avatars.com/api/?name=${message.sender.name}`}
             alt={message.sender.name}
             className="w-8 h-8 rounded-full"
           />
@@ -35,9 +35,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, currentUser }) => {
         }`}
       >
         {!isOwnMessage && (
-          <p className="text-xs font-semibold mb-1">{message.sender.username}</p>
+          <p className="text-xs font-semibold mb-1">{message.sender.name}</p>
         )}
-        <p className="break-words">{message.text}</p>
+        <p className="break-words">{message.content}</p>
         <p className={`text-xs mt-1 ${isOwnMessage ? "text-purple-100" : "text-gray-500 dark:text-gray-400"}`}>
           {format(new Date(message.timestamp), 'h:mm a')}
         </p>
@@ -46,8 +46,8 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, currentUser }) => {
       {isOwnMessage && (
         <div className="flex-shrink-0 ml-2">
           <img
-            src={currentUser?.avatar || `https://ui-avatars.com/api/?name=${currentUser?.username}`}
-            alt={currentUser?.username}
+            src={/*currentUser?.avatar ||*/ `https://ui-avatars.com/api/?name=${currentUser?.name}`}
+            alt={currentUser?.name}
             className="w-8 h-8 rounded-full"
           />
         </div>

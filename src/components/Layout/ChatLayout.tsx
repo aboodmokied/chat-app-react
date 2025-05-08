@@ -5,10 +5,11 @@ import UserList from "../Chat/UserList";
 import ChatArea from "../Chat/ChatArea";
 // import socketService, { Room, User } from "../../services/socket";
 import { Button } from "../../components/ui/button";
-import { MenuIcon, X } from "lucide-react";
+import { MenuIcon, PlusCircle, X } from "lucide-react";
 import socketService, { Chat, GetChatsData, GetChatUsersData, Message, NewChatData, NewMessageData, User } from "@/services/socket";
 import { useSocket } from "@/context/SocketContext";
 import ChatList from "../Chat/ChatList";
+import NewChatModal from "../Chat/NewChatModal";
 
 const ChatLayout: React.FC = () => {
   const { user, logout,isAuthenticated, token } = useAuth();
@@ -17,10 +18,11 @@ const ChatLayout: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [newMessage, setNewMessage] = useState<Message|null>(null);
+  const [showNewChatModal, setShowNewChatModal] = useState(false);
   // For mobile responsiveness
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
-  const {socket,connectSocket,socketConnectionLoading,socketError}=useSocket();
+  const {socket,connectSocket,socketConnectionLoading,socketError,socketConnected}=useSocket();
 
   useEffect(() => {
     const handleResize = () => {
@@ -45,61 +47,76 @@ const ChatLayout: React.FC = () => {
      socketService.removeListeners()
     };
   },[isAuthenticated])
-
+  useEffect(() => {
+    if (socket && socketConnected) {
+    }
+  }, [socket, socketConnected]);
   // Initialize chats
   useEffect(() => {
-    if (!user || !socket) return;
-
+    if (!user || !socket || !socketConnected) return;
     // Get User Chats
     socketService.getChats(({chats}:GetChatsData) => {
-      console.log({chats});
       setChats(chats);
+      setActiveChat(chats[0]?._id||null);
     })
-    setActiveChat(chats[0]?.id||null);
     
     // Listen for new chats
     socketService.onNewChat(({chat}:NewChatData)=>{setChats((prev)=>[chat,...prev])})
-    // Listen for new messages
-    socketService.onNewMessage(({message,chat}:NewMessageData)=>{
-      if(activeChat===chat.id){
-        // add this message to active chat messages ui
-        setNewMessage(message)
-      }else{
-        // show notification or alert to the user
-      }
-      // get the message chat to the top of the chats list
-      setChats(prevChats => {
-        // Remove the chat with matching ID from the array
-        const filteredChats = prevChats.filter(c => c.id !== chat.id);
-        // Add the chat to the beginning of the array
-        return [chat, ...filteredChats];
-      });
-    })
+    
 
     // Cleanup function to remove event listeners when component unmounts
     return () => {
       socketService.offNewChat();
       socketService.offNewMessage();
+      socketService.offGetChats();
     };
-  }, [socket, user, activeChat]);
+  }, [socket, user,socketConnected]);
 
+
+  useEffect(()=>{
+    // Listen for new messages
+    socketService.onNewMessage(({message,chat}:NewMessageData)=>{
+      if(activeChat===chat._id){
+        // add this message to active chat messages ui
+        setNewMessage(message)
+      }else{
+        // 
+        // show notification or alert to the user
+      }
+      // get the message chat to the top of the chats list
+      setChats(prevChats => {
+        // Remove the chat with matching ID from the array
+        const filteredChats = prevChats.filter(c => c._id !== chat._id);
+        // Add the chat to the beginning of the array
+        return [chat, ...filteredChats];
+      });
+      
+    })
+    return () => {
+      socketService.offNewMessage();
+    };
+  },[activeChat])
   // Get users for the active room
   useEffect(() => {
-    if (!user || !activeChat || !socket) return;
-
+    if (!user || !activeChat || !socket ) return;
 
     socketService.getChatUsers({chatId:activeChat},({users}:GetChatUsersData)=>{
-      console.log({users});
-      setUsers(users);
+      setUsers(users.users);
     })
-  }, [user, activeChat,socket]);
+    return ()=>{
+      socketService.offGetChatUsers();
+    }
+  }, [activeChat]);
 
   const handleChatSelect = (chatId: string) => {
-    console.log('New Room')
     setActiveChat(chatId);
     if (isMobile) {
       setSidebarOpen(false);
     }
+  };
+
+  const handleNewChat = () => {
+    setShowNewChatModal(true);
   };
 
   if (socketConnectionLoading) {
@@ -161,7 +178,17 @@ const ChatLayout: React.FC = () => {
             </button>
           )}
         </div>
-
+        {/* New Chat button */}
+        <div className="p-3">
+          <Button 
+            onClick={handleNewChat}
+            className="w-full flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-600/90 text-sidebar-primary-foreground"
+            >
+            <PlusCircle size={18} />
+            New Chat
+          </Button>
+        </div>
+        {/* Chat list */}
         <div className="flex-1 overflow-y-auto">
           <ChatList
             chats={chats}
@@ -212,20 +239,20 @@ const ChatLayout: React.FC = () => {
             <span className="sr-only">Open sidebar</span>
           </button>
           <h2 className="font-medium">
-            {activeChat && chats.find(chat => chat.id === activeChat)?.id}
+            {activeChat && chats.find(chat => chat._id === activeChat)?._id}
           </h2>
         </div>
 
         {/* Chat header for desktop */}
         <div className="hidden lg:flex bg-white dark:bg-gray-800 p-4 border-b border-gray-200 dark:border-gray-700 items-center">
           <h2 className="font-medium text-lg">
-            # {activeChat && chats.find(chat => chat.id === activeChat)?.id}
+            # {activeChat && chats.find(chat => chat._id === activeChat)?._id}
           </h2>
         </div>
 
         {/* Chat area */}
         <div className="flex-1 overflow-hidden">
-          <ChatArea currentUser={user} activeChat={activeChat} newMessage={newMessage}/>
+          <ChatArea currentUser={user} activeChat={activeChat} newMessage={newMessage} chatUsers={users}/>
         </div>
       </div>
 
@@ -236,6 +263,11 @@ const ChatLayout: React.FC = () => {
           onClick={() => setSidebarOpen(false)}
         ></div>
       )}
+      {/* New Chat Modal */}
+      <NewChatModal 
+        isOpen={showNewChatModal} 
+        onOpenChange={setShowNewChatModal}
+      />
     </div>
   );
 };
