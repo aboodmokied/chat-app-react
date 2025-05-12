@@ -57,7 +57,7 @@ const ChatLayout: React.FC = () => {
     // Get User Chats
     socketService.getChats(({chats}:GetChatsData) => {
       setChats(chats);
-      setActiveChat(chats[0]?._id||null);
+      // setActiveChat(chats[0]?._id||null);
     })
     
     // Listen for new chats
