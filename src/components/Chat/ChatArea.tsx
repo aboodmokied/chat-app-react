@@ -70,6 +70,7 @@ import React, {
       if (!activeChat || !currentUser) return;
       setMessageMap(new Map());
       setPage(1);
+      setHasMore(true);
       setNewMessageCount(0);
       getChatMessages(1);
     }, [activeChat, currentUser]);
@@ -78,17 +79,18 @@ import React, {
     useEffect(() => {
       if (!activeChat || !currentUser || page === 1) return;
       getChatMessages(page);
-    }, [page]);
+    }, [page,activeChat]);
 
     const getChatMessages = async (page = 1) => {
       setLoading(true);
       isPrependingRef.current = page > 1;
 
       socketService.getChatMessages(
-        { chatId: activeChat, limit: 10, page },
+        { chatId: activeChat, limit: 20, page },
         ({ messages }: GetChatMessagesData) => {
-          if (messages.length < 10) setHasMore(false);
-
+          if (messages.length < 20){
+            setHasMore(false);
+          } 
           setMessageMap(prevMap => {
             const updated = new Map(prevMap);
             messages.forEach(msg => {

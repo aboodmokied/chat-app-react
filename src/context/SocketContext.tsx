@@ -11,6 +11,13 @@ interface SocketContextType {
   socketError: any;                     // Error state for socket connections
   socketConnectionLoading: boolean; 
   socketConnected: boolean;
+  socketValidationError:SocketValidationErrorType | null
+}
+
+type SocketValidationErrorType={
+  event:string,
+  message:string[]|string,
+  status:number
 }
 
 // Create context with default values
@@ -20,6 +27,7 @@ const SocketContext = createContext<SocketContextType>({
   socketError: null,
   socketConnectionLoading: true,
   socketConnected: false,
+  socketValidationError:null
 });
 
 /**
@@ -32,6 +40,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [socketConnected, setSocketConnected] = useState<boolean>(false);
   const [socketConnectionLoading, setSocketConnectionLoading] = useState(true);
   const [socketError, setSocketError] = useState(null);
+  const [socketValidationError, setSocketValidationError] = useState<SocketValidationErrorType|null>(null);
 
   /**
    * Establishes a connection to the socket server using the provided auth token
@@ -69,6 +78,10 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         console.error("Socket error:", error);
         setSocketError(error);
       });
+      socket.on("validation_error", (error) => {
+        console.error("Validation error:", error);
+        setSocketValidationError(error);
+      });
     } catch (error) {
       console.error("Socket Connection Failed:", error);
       setSocketError(error.response?.data || error.message);
@@ -85,7 +98,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         connectSocket,
         socketError,
         socketConnectionLoading,
-        socketConnected
+        socketConnected,
+        socketValidationError
       }}
     >
       {children}

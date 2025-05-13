@@ -5,7 +5,7 @@ import { cn } from "../../lib/utils";
 import { Chat } from "@/services/socket";
 
 interface RoomListProps {
-  chats: any[];
+  chats: Chat[];
   activeChat?: string;
   onChatSelect: (roomId: string) => void;
 }
@@ -38,7 +38,7 @@ const ChatList: React.FC<RoomListProps> = ({ chats, activeChat, onChatSelect }) 
             )}
           >
             <span className="mr-2">#</span>
-            {chat._id}
+            {chat.chatName}
           </button>
         ))
       )}

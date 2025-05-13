@@ -59,9 +59,19 @@ const ChatLayout: React.FC = () => {
       setChats(chats);
       // setActiveChat(chats[0]?._id||null);
     })
-    
     // Listen for new chats
-    socketService.onNewChat(({chat}:NewChatData)=>{setChats((prev)=>[chat,...prev])})
+    socketService.onNewChat(({chat}:NewChatData)=>{
+      setChats(prevChats => {
+      const isAlreadyExist = prevChats.find(ch => ch._id === chat._id);
+      if (!isAlreadyExist) {
+        return [chat, ...prevChats];
+      } else {
+        const otherMessages = prevChats.filter(ch => ch._id !== chat._id);
+        return [isAlreadyExist, ...otherMessages];
+      }
+      });
+      setActiveChat(chat._id);
+  })
     
 
     // Cleanup function to remove event listeners when component unmounts
@@ -239,7 +249,7 @@ const ChatLayout: React.FC = () => {
             <span className="sr-only">Open sidebar</span>
           </button>
           <h2 className="font-medium">
-            {activeChat && chats.find(chat => chat._id === activeChat)?._id}
+            {activeChat && chats.find(chat => chat._id === activeChat)?.chatName}
           </h2>
         </div>
 

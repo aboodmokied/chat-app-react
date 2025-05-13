@@ -53,6 +53,7 @@ export interface Chat {
   _id: string;
   room: string;
   users: User[];
+  chatName:string
 }
 
 export type ErrorHandler=(error:any)=>void;
@@ -136,6 +137,7 @@ class SocketService {
   joinChat(senderId: string,recieverEmail:string): void {
     if (this.socket) {
       this.socket.emit("joinChat", {
+        event:"joinChat",
         senderId,
         recieverEmail,
       });
