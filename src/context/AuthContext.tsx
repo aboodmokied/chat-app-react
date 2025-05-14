@@ -55,6 +55,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string) => {
     try {
       setIsLoading(true)
+      setAuthError(null); // Clear any previous errors
       const config: AxiosRequestConfig = {
         headers: {
           'Content-Type': 'application/json',
@@ -85,7 +86,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (error) {
       console.error("Login failed:", error);
       setAuthError(error.response?.data || error.message );
-      // return Promise.reject(error);
+      // Don't swallow the error, propagate it to the component
+      throw error;
     } finally {
       setIsLoading(false);
     }

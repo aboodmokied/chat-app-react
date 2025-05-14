@@ -256,7 +256,7 @@ const ChatLayout: React.FC = () => {
         {/* Chat header for desktop */}
         <div className="hidden lg:flex bg-white dark:bg-gray-800 p-4 border-b border-gray-200 dark:border-gray-700 items-center">
           <h2 className="font-medium text-lg">
-            # {activeChat && chats.find(chat => chat._id === activeChat)?._id}
+            # {activeChat && chats.find(chat => chat._id === activeChat)?.chatName}
           </h2>
         </div>
 
