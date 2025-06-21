@@ -14,7 +14,7 @@ interface AuthContextType {
   authError:any
 }
 
-const apiUrl=import.meta.env.VITE_API_URL || "http://localhost:3000";
+const apiUrl=import.meta.env.VITE_API_URL || "https://chat-api-nestjs.onrender.com";
 
 interface LoginResponse {
   accessToken: string;

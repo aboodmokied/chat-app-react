@@ -26,7 +26,7 @@ interface UserData {
   name: string;
   email: string;
 }
-const apiUrl=import.meta.env.VITE_API_URL || "http://localhost:3000";
+const apiUrl=import.meta.env.VITE_API_URL || "https://chat-api-nestjs.onrender.com";
 
 const NewChatModal: React.FC<NewChatModalProps> = ({ isOpen, onOpenChange }) => {
   const [recipient, setRecipient] = useState("");

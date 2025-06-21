@@ -61,7 +61,7 @@ export type ErrorHandler=(error:any)=>void;
 // Create a singleton socket instance
 class SocketService {
   private socket: Socket | null = null;
-  private apiUrl=import.meta.env.VITE_API_URL || "http://localhost:3000";
+  private apiUrl=import.meta.env.VITE_API_URL || "https://chat-api-nestjs.onrender.com";
   private errorHandler:ErrorHandler=(error)=>{console.log(error)};
 
   setErrorHandler(handler:ErrorHandler){

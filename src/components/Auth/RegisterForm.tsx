@@ -8,7 +8,7 @@ import { Mail, Lock, User, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "../ui/alert";
 import axios, { AxiosRequestConfig } from "axios";
 
-const apiUrl=import.meta.env.VITE_API_URL || "http://localhost:3000";
+const apiUrl=import.meta.env.VITE_API_URL || "https://chat-api-nestjs.onrender.com";
 
 const RegisterForm: React.FC = () => {
   const [email, setEmail] = useState("");
