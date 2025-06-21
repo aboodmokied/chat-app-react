@@ -1,73 +1,71 @@
-# Welcome to your Lovable project
+# 💬 React Chat App (Frontend)
 
-## Project info
+A real-time chat application frontend built with **React**, **Socket.IO**, and **Vite**. It connects to a NestJS backend and enables authenticated real-time messaging between users.
 
-**URL**: https://lovable.dev/projects/cb021183-9ff3-4db1-8f8c-f14f33c1768e
+---
 
-## How can I edit this code?
+## 🚀 Getting Started
 
-There are several ways of editing your application.
+### 1. Clone the repo
 
-**Use Lovable**
+### 2. Install dependencies
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/cb021183-9ff3-4db1-8f8c-f14f33c1768e) and start prompting.
+```bash
+npm install
+```
 
-Changes made via Lovable will be committed automatically to this repo.
+### 3. Set up environment variables
 
-**Use your preferred IDE**
+Create a `.env` file in the root directory:
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+```
+VITE_API_URL=https://chat-api-nestjs.onrender.com
+```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+> You can change the URL to your local or production backend.
 
-Follow these steps:
+### 4. Run the app
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The app should now be running at [http://localhost:8000](http://localhost:8000)
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+---
 
-**Use GitHub Codespaces**
+## 🔐 Authentication
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+* Register or login using the REST API.
+* JWT is stored in localStorage and used for API and socket authentication.
 
-## What technologies are used for this project?
 
-This project is built with:
+---
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 📦 Features
 
-## How can I deploy this project?
+* User registration and login
+* Real-time chat via Socket.IO
+* Private chat rooms
+* Message seen status
+* Chat list and message history
 
-Simply open [Lovable](https://lovable.dev/projects/cb021183-9ff3-4db1-8f8c-f14f33c1768e) and click on Share -> Publish.
+---
 
-## Can I connect a custom domain to my Lovable project?
+## 🧪 Demo
 
-Yes, you can!
+https://chat-app-react-ebon.vercel.app
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+> 💡 **Hint:** You can sign up with any fake email/password for testing.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+---
+
+## 🛠 Tech Stack
+
+* **React** with Vite
+* **Socket.IO Client**
+* **Axios** for HTTP requests
+* **Tailwind CSS** for UI styling
+
+---
+
