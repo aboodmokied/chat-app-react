@@ -8,6 +8,8 @@ import { Mail, Lock, User, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "../ui/alert";
 import axios, { AxiosRequestConfig } from "axios";
 
+const apiUrl=import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 const RegisterForm: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -71,7 +73,7 @@ const RegisterForm: React.FC = () => {
             'Accept': 'application/json',
         }
     };
-      await axios.post('http://localhost:3000/user',{
+      await axios.post(`${apiUrl}/user`,{
         name:username,
         password,
         email

@@ -26,6 +26,7 @@ interface UserData {
   name: string;
   email: string;
 }
+const apiUrl=import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 const NewChatModal: React.FC<NewChatModalProps> = ({ isOpen, onOpenChange }) => {
   const [recipient, setRecipient] = useState("");
@@ -53,7 +54,7 @@ const NewChatModal: React.FC<NewChatModalProps> = ({ isOpen, onOpenChange }) => 
 
     setIsSearching(true);
     try {
-      const res = await axios.post("http://localhost:3000/user/by-email", {
+      const res = await axios.post(`${apiUrl}/user/by-email`, {
          email: recipient.trim()
       });
       if (res.status === 200 && res.data) {

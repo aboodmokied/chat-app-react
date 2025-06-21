@@ -14,6 +14,7 @@ interface AuthContextType {
   authError:any
 }
 
+const apiUrl=import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 interface LoginResponse {
   accessToken: string;
@@ -62,7 +63,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           'Accept': 'application/json',
         }
       };
-      const response=await axios.post<LoginResponse>('http://localhost:3000/auth/login',{
+      const response=await axios.post<LoginResponse>(`${apiUrl}/auth/login`,{
         email,
         password
       },config)
